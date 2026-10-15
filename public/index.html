@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <title>Originates | Scalable AI Workflow & Cloud Orchestration</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#0a0c10;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}
+    a{color:#58a6ff;text-decoration:none;}
+    .container{max-width:1200px;margin:0 auto;padding:0 24px;}
+    header{background:rgba(10,12,16,0.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;border-bottom:1px solid #21262d;}
+    nav{display:flex;justify-content:space-between;align-items:center;height:70px;}
+    .logo{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#fff;}
+    .logo span{color:#2f81f7;}
+    .nav-links{display:flex;gap:24px;list-style:none;}
+    .nav-links a{color:#8b949e;font-size:14px;font-weight:500;transition:color 0.2s;}
+    .nav-links a:hover{color:#fff;}
+    .btn{display:inline-block;padding:10px 20px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;}
+    .btn-primary{background:#238636;color:#fff;}
+    .btn-primary:hover{background:#2ea043;}
+    .hero{padding:100px 0 60px;text-align:center;}
+    .hero h1{font-size:52px;font-weight:800;line-height:1.15;margin-bottom:20px;background:linear-gradient(180deg,#fff,#8b949e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .hero p{font-size:20px;color:#8b949e;max-width:760px;margin:0 auto 36px;}
+    .terminal{background:#161b22;border:1px solid #30363d;border-radius:8px;max-width:720px;margin:40px auto 0;text-align:left;box-shadow:0 20px 40px rgba(0,0,0,0.5);}
+    .terminal-header{background:#0d1117;padding:10px 16px;border-bottom:1px solid #30363d;display:flex;gap:8px;}
+    .dot{width:12px;height:12px;border-radius:50%;}
+    .dot-red{background:#ff5f56;}.dot-yellow{background:#ffbd2e;}.dot-green{background:#27c93f;}
+    .terminal-body{padding:20px;font-family:monospace;font-size:14px;color:#7ee787;}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:80px 0;text-align:center;}
+    .metric-card{background:#161b22;border:1px solid #21262d;padding:32px;border-radius:8px;}
+    .metric-val{font-size:42px;font-weight:800;color:#2f81f7;}
+    .metric-lbl{color:#8b949e;font-size:14px;margin-top:8px;}
+    .section-title{text-align:center;font-size:32px;margin:80px 0 40px;color:#fff;}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+    .card{background:#161b22;border:1px solid #21262d;padding:32px;border-radius:8px;}
+    .card h3{font-size:20px;margin-bottom:12px;color:#fff;}
+    .card p{color:#8b949e;font-size:14px;}
+    .pricing-card{text-align:center;}
+    .price{font-size:36px;font-weight:800;color:#fff;margin:16px 0;}
+    .about{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:40px;margin:80px 0;text-align:center;}
+    footer{border-top:1px solid #21262d;padding:40px 0;text-align:center;color:#8b949e;font-size:14px;}
+    footer a{color:#58a6ff;margin:0 10px;}
+    button,a{touch-action:manipulation} a:focus-visible{outline:3px solid #58a6ff;outline-offset:4px}
+    .availability{margin:24px 0;padding:16px;border:1px solid #30363d;border-radius:8px;color:#b9c3cd;font-size:16px}
+    @media(max-width:700px){.nav-links{display:flex;order:3;width:100%;gap:16px;justify-content:center;flex-wrap:wrap}nav{height:auto;min-height:70px;flex-wrap:wrap;padding:12px 0}.hero{padding-top:56px}.hero h1{font-size:34px}.hero p{font-size:18px}.grid-3,.metrics{grid-template-columns:1fr}.metric-val{font-size:32px}.card,.about{padding:24px}nav{gap:12px}.btn{min-height:44px}.container{padding:0 20px}.terminal-body{overflow-wrap:anywhere}.section-title{font-size:28px}}
+    </style>
+  </head>
+  <body>
+    <header><div class="container"><nav><div class="logo">Originates<span>.dev</span></div><ul class="nav-links"><li><a href="#features">Features</a></li><li><a href="#architecture">Architecture</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#about">About</a></li></ul><a class="btn btn-primary" href="/login">Log in / Sign up</a></nav></div></header>
+  <div class="container"><p class="availability">Product preview · Account registration and login are available on the server-hosted version. AI orchestration, CLI, billing and enterprise capabilities below describe the product vision, not currently available services. Performance figures are illustrative, not verified guarantees.</p></div><section class="hero"><div class="container"><h1>Scalable AI Workflow & Cloud Orchestration for Engineering Teams</h1><p>Originates empowers engineering teams to build, deploy, and scale autonomous AI workflows and serverless cloud infrastructure seamlessly.</p><div class="terminal"><div class="terminal-header"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="terminal-body"><p>$ npm i -g originates-cli</p><p style="color:#8b949e;">[+] Installed originates-cli v2.4.0</p><p>$ originates deploy --env production</p><p style="color:#58a6ff;">[info] Orchestrating multi-agent graph...</p><p style="color:#7ee787;">[success] Deployed to originates.dev (Latency: 28ms, SLA: 99.98%)</p></div></div></div></section>
+  <section class="container"><div class="metrics"><div class="metric-card"><div class="metric-val">99.98%</div><div class="metric-lbl">Uptime SLA</div></div><div class="metric-card"><div class="metric-val">&lt;35ms</div><div class="metric-lbl">Global Latency</div></div><div class="metric-card"><div class="metric-val">500M+</div><div class="metric-lbl">Workflow Runs / Day</div></div></div></section>
+  <section id="features" class="container"><h2 class="section-title">Core Platform Features</h2><div class="grid-3"><div class="card"><h3>Deterministic Multi-Agent Workflows</h3><p>Design complex, stateful multi-agent DAGs with strict execution guarantees, automated retry policies, and zero-loss state persistence.</p></div><div class="card"><h3>Real-Time Trace & Cost Telemetry</h3><p>Gain full observability into token expenditure, model latency, and runtime execution metrics with sub-millisecond precision.</p></div><div class="card"><h3>Serverless Edge Sandboxes</h3><p>Execute untrusted code and heavy AI workloads in secure, isolated MicroVM sandboxes deployed across global edge networks.</p></div></div></section>
+  <section id="architecture" class="container"><h2 class="section-title">Enterprise Architecture</h2><div class="grid-3"><div class="card"><h3>Git-Native CI/CD</h3><p>Trigger workflow builds directly from git commits with automated preview environments and release pipelines.</p></div><div class="card"><h3>Unified Model & API Gateway</h3><p>Connect seamlessly to top AI provider models with automated fallback, load balancing, and rate limiting.</p></div><div class="card"><h3>Fine-Grained RBAC</h3><p>Enterprise-grade security featuring SAML/SSO, granular team role permissions, and SOC 2 Type II compliance.</p></div></div></section>
+  <section id="pricing" class="container"><h2 class="section-title">Simple, Transparent Pricing</h2><div class="grid-3"><div class="card pricing-card"><h3>Developer</h3><div class="price">$0<span style="font-size:14px;color:#8b949e;">/mo</span></div><p>Ideal for side projects & individual developers building prototype AI pipelines.</p></div><div class="card pricing-card" style="border-color:#2f81f7;"><h3>Startup & Growth</h3><div class="price">$149<span style="font-size:14px;color:#8b949e;">/mo</span></div><p>For growing engineering teams requiring production SLAs and dedicated edge sandboxes.</p></div><div class="card pricing-card"><h3>Enterprise</h3><div class="price">Custom</div><p>Tailored cloud orchestration, custom model integrations, dedicated support & SLA guarantees.</p></div></div></section>
+  <section id="about" class="container"><div class="about"><h2 style="margin-bottom:16px;">About Originates Inc.</h2><p style="color:#8b949e;max-width:800px;margin:0 auto;">Originates Inc. was founded by a team of veteran distributed systems and AI engineers dedicated to elevating cloud orchestration for high-performance engineering organizations. Operating as a high-velocity team of 12–50 engineers and researchers globally, we build the core backbone for next-generation AI workflows at originates.dev.</p></div></section>
+  <footer><div class="container"><p>&copy; 2026 Originates Inc. (originates.dev) All rights reserved.</p><p style="margin-top:8px;">Contact Us: <a href="mailto:admin@originates.dev">admin@originates.dev</a> | <a href="mailto:ceo@originates.dev">ceo@originates.dev</a></p></div></footer>
+  </body>
+</html>

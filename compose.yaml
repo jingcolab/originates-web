@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      APP_ORIGIN: https://originates.dev
+      DATA_DIR: /app/data
+      PORT: 3000
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - originates-data:/app/data
+volumes:
+  originates-data:
