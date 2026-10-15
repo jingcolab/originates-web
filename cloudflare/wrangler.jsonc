@@ -1,0 +1,20 @@
+{
+  "name": "originates-web",
+  "main": "dist/worker.mjs",
+  "account_id": "3b24df487ceb1d619f5064ff5a89a025",
+  "compatibility_date": "2026-10-15",
+  "workers_dev": true,
+  "build": { "command": "npm run build" },
+  "vars": {
+    "APP_ORIGIN": "https://originates.dev",
+    "PREVIEW_ORIGIN": "https://originates-web.fucicbck.workers.dev",
+    "GITHUB_CLIENT_ID": "Ov23liLhiAol6xu5P2AH"
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "originates-db",
+    "database_id": "ddce2536-d1a8-4bfa-92de-419ca7705186"
+  }],
+  "triggers": { "crons": ["0 3 * * *"] },
+  "observability": { "enabled": false }
+}

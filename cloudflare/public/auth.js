@@ -1,0 +1,4 @@
+const messages={not_configured:'Sign-in is not configured yet. Please try again later.',invalid_state:'This sign-in request could not be verified. Please start again.',expired:'Your sign-in request expired. Please start again.',cancelled:'GitHub sign-in was cancelled. You can try again whenever you are ready.',invalid_callback:'This sign-in response was incomplete. Please start again.',provider:'GitHub sign-in could not be completed. Please try again.'};
+const error=new URLSearchParams(location.search).get('error');
+if(error){document.querySelector('#message').textContent=messages[error]||'Unable to sign in. Please try again.';document.querySelector('#message').className='message error';history.replaceState(null,'','/login');}
+fetch('/api/me',{credentials:'same-origin'}).then(r=>{if(r.ok)location.replace('/app');}).catch(()=>{});
