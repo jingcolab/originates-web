@@ -1,9 +1,6 @@
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
-const routes={'/':'index.html','/login':'login.html','/app':'app.html','/auth.js':'auth.js','/account.js':'account.js','/account.css':'account.css'};
-const assets={};for(const [route,file] of Object.entries(routes))assets[route]={type:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html',body:readFileSync(new URL('./public/'+file,import.meta.url),'utf8')};
-const declaration='const STATIC_ASSETS='+JSON.stringify(assets)+';\n';
-writeFileSync(new URL('./src/assets.mjs',import.meta.url),'export '+declaration);
-mkdirSync(new URL('./dist',import.meta.url),{recursive:true});
-const code=readFileSync(new URL('./src/worker.mjs',import.meta.url),'utf8').replace("import { STATIC_ASSETS } from './assets.mjs';",declaration);
-writeFileSync(new URL('./dist/worker.mjs',import.meta.url),code);
-console.log('Built standalone Worker:',Buffer.byteLength(code),'bytes');
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';import {build} from 'esbuild';
+await build({entryPoints:[new URL('./public/auth-entry.mjs',import.meta.url).pathname],bundle:true,format:'iife',minify:true,outfile:new URL('./public/auth.js',import.meta.url).pathname});
+const routes={'/':'index.html','/login':'login.html','/app':'app.html','/auth.js':'auth.js','/account.js':'account.js','/site.css':'site.css','/assets/robot-lab.webp':'assets/robot-lab.webp'};
+const assets={};for(const [route,file]of Object.entries(routes)){const binary=file.endsWith('.webp');assets[route]={type:binary?'image/webp':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html',body:readFileSync(new URL('./public/'+file,import.meta.url),binary?'base64':'utf8'),...(binary?{base64:true}:{})};}
+writeFileSync(new URL('./src/assets.mjs',import.meta.url),'export const STATIC_ASSETS='+JSON.stringify(assets)+';\n');mkdirSync(new URL('./dist',import.meta.url),{recursive:true});
+await build({entryPoints:[new URL('./src/worker.mjs',import.meta.url).pathname],bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true,outfile:new URL('./dist/worker.mjs',import.meta.url).pathname});console.log('Built Worker:',readFileSync(new URL('./dist/worker.mjs',import.meta.url)).length,'bytes');

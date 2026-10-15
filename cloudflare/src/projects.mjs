@@ -1,0 +1,14 @@
+import {validOrigin,bodyJSON} from './passkeys.mjs';
+const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json; charset=utf-8'}});
+const shape=p=>({id:p.id,name:p.name,type:p.type,status:p.status,notes:p.notes,createdAt:p.created_at,updatedAt:p.updated_at});
+export async function projectsRoute(request,env,user){if(!user)return json({error:'请先登录。'},401);const path=new URL(request.url).pathname,id=path.slice('/api/projects/'.length),db=env.DB;
+ const exported=path.match(/^\/api\/projects\/([-a-f0-9]{36})\/export$/);
+ if(request.method==='GET'&&exported){const p=await db.prepare('SELECT * FROM projects WHERE id=? AND owner_id=?').bind(exported[1],user.id).first();if(!p)return json({error:'项目不存在。'},404);const text='# '+p.name+'\n\n- 方向：'+p.type+'\n- 阶段：'+p.status+'\n\n## 开发笔记\n\n'+p.notes+'\n\n---\n由 Originates 导出。真实硬件测试需人工监督及安全检查。\n';return new Response(text,{headers:{'Content-Type':'text/markdown; charset=utf-8','Content-Disposition':'attachment; filename="robot-project.md"'}});}
+ if(request.method==='GET'&&path==='/api/projects'){const rows=await db.prepare('SELECT * FROM projects WHERE owner_id=? ORDER BY updated_at DESC').bind(user.id).all();return json({projects:rows.results.map(shape)});}
+ if(!validOrigin(request))return json({error:'请求来源不被允许。'},403);
+ if(request.method==='DELETE'&&/^[-a-f0-9]{36}$/.test(id)){const result=await db.prepare('DELETE FROM projects WHERE id=? AND owner_id=?').bind(id,user.id).run();return result.meta?.changes?json({ok:true}):json({error:'项目不存在。'},404);}
+ if(!((request.method==='POST'&&path==='/api/projects')||(request.method==='PUT'&&/^[-a-f0-9]{36}$/.test(id))))return json({error:'接口不存在或方法不被允许。'},405);
+ let body;try{body=await bodyJSON(request);}catch{return json({error:'项目内容格式无效或过长。'},400);}const {name,type,status,notes}=body;
+ if(typeof name!=='string'||name.trim().length<1||name.trim().length>80||!['机械臂','移动机器人','具身智能','其他机器人'].includes(type)||!['构想','开发中','实验验证','已归档'].includes(status)||typeof notes!=='string'||notes.length>8000)return json({error:'请检查项目名称、方向、阶段与笔记长度（最多 8000 字）。'},400);
+ const now=Date.now();let p;if(request.method==='POST'){const newId=crypto.randomUUID();p=await db.prepare('INSERT INTO projects(id,owner_id,name,type,status,notes,created_at,updated_at) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT count(*) FROM projects WHERE owner_id=?)<50 RETURNING *').bind(newId,user.id,name.trim(),type,status,notes,now,now,user.id).first();if(!p)return json({error:'最多可以保存 50 个项目，请先删除不需要的项目。'},409);}else{p=await db.prepare('UPDATE projects SET name=?,type=?,status=?,notes=?,updated_at=? WHERE id=? AND owner_id=? RETURNING *').bind(name.trim(),type,status,notes,now,id,user.id).first();if(!p)return json({error:'项目不存在。'},404);}return json({project:shape(p)},request.method==='POST'?201:200);
+}

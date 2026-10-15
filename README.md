@@ -1,27 +1,35 @@
-# Originates Web
+# Originates · Robotics & Embodied AI
 
-Public landing page with real GitHub account sign-in on **Cloudflare Workers Free + D1**. No Supabase or paid Workers subscription is used.
+A Chinese-language developer site for **physical robotics and embodied AI**, with a real project notebook on **Cloudflare Workers Free + D1**. No Supabase, paid Worker upgrade, model charges, or hardware connection is enabled.
 
-- Homepage: https://originates.dev (GitHub Pages)
-- Sign in: https://originates-web.fucicbck.workers.dev/login
-- Protected account: https://originates-web.fucicbck.workers.dev/app
-- Health: https://originates-web.fucicbck.workers.dev/api/health
+- Website: https://originates.dev (GitHub Pages)
+- Login / email registration: https://originates-web.fucicbck.workers.dev/login
+- Project workspace: https://originates-web.fucicbck.workers.dev/app
 
-The homepage links to the Worker. `/login/` and `/app/` on Pages forward to that host. Account cookies belong to the Worker host, not GitHub Pages. The custom domain has **not** been migrated: `originates.dev` is not present in the Cloudflare account used for this deployment. Domain ownership/access must be resolved before adding its Worker custom domain; the Pages `CNAME` is intentionally preserved.
+## Available now
 
-## Implemented
+- Robotics-focused homepage: perception, planning, control, and links to official ROS 2 / Gazebo / MoveIt documentation. The robot photo is an AI-generated concept illustration, not a company product or lab claim.
+- Registration using any supported-format email address, with a **WebAuthn passkey** (device fingerprint, face, screen lock or security key). No GitHub account or password is required.
+- Existing GitHub OAuth login retained with S256 PKCE, browser-bound single-use state, minimal profile/email scopes and no repository access.
+- Secure seven-day sessions, server-side logout revocation, origin checks, basic rate limits and daily expired-record cleanup.
+- Per-user robotics projects: create, list, edit, delete; platform/direction, stage and development notes; maximum 50 projects per account. Markdown export and a local AI-collaboration prompt template.
 
-GitHub OAuth authorization-code sign-in with S256 PKCE and browser-bound, single-use expiring state; first sign-in creates a D1 account. Sessions are persisted as SHA-256 hashes, use Secure/HttpOnly/SameSite=Lax cookies, expire after seven days, and are revoked on logout. Only GitHub profile and email scopes are requested. GitHub tokens are never persisted. Origin checks, login rate limiting, security headers, and daily expired-record cleanup are included.
+**Email ownership is not verified.** Email is an account identifier, not proof of identity. No verification email, password, email recovery or automatic account linking is offered. Keep/sync your passkey; its origin is the Worker host where it was registered. GitHub and email accounts remain separate even if their email strings match. Passkeys do not silently migrate to a different domain. Changing account domains requires a separate credential migration/re-enrollment design.
 
-This release does **not** implement AI workflow execution, cloud sandboxes, billing, paid plans, team permissions, a public API-key system, email/password registration, or password recovery. Marketing features and performance numbers on the landing page describe the product vision, not verified services or guarantees. The earlier Node email/password prototype is kept on `fix/account-login`; it is not the deployed Worker.
+No simulation, remote hardware control, AI model execution, robot deployment, model training, billing or paid plans are implemented. Generated prompt text is not an AI inference result. Review all code and use appropriate safety procedures before working with real hardware.
 
-## Development and deployment
-
-See [cloudflare/README.md](cloudflare/README.md) for schema, configuration, endpoints, testing, deployment and rollback. The Worker has no npm runtime dependencies.
+## Development
 
 ```sh
 cd cloudflare
+npm ci
 npm test
 ```
 
-Node.js 24 or newer is required. Tests use in-memory SQLite and a mocked GitHub provider; they do not contact live GitHub. Live GitHub sign-in and logout were separately verified against the deployed Worker.
+Node.js 24+ is required. There are 27 automated unit/integration tests, including OAuth, passkey challenge binding/expiry/replay, invalid credentials, origin/CSRF protection, project ownership, quotas, logout and cleanup. Some tests inject a mock WebAuthn verifier to isolate persistence paths; a separate test uses the actual verifier to reject fabricated credentials. Separate live protocol tests use dedicated synthetic P-256 test keys and real production verification for registration and signed authentication. The system biometric/passkey dialog must be tested on the user’s own supported device; the shared browser cannot complete that native UI. No end-user biometric data is collected or stored.
+
+See [cloudflare/README.md](cloudflare/README.md) for configuration, deployment, schema and rollback.
+
+## Hosting boundary
+
+The homepage remains on GitHub Pages and links to the Worker account site. `/login/` and `/app/` forward there. The Pages CNAME is preserved: the Cloudflare account used for this Worker does not contain the `originates.dev` zone. No DNS transfer was performed. GitHub source updates run tests and publish Pages, but do not automatically deploy the Worker.

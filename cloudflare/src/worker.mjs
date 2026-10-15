@@ -1,4 +1,6 @@
 import { STATIC_ASSETS } from './assets.mjs';
+import passkeyRoute from './passkeys.mjs';
+import {projectsRoute} from './projects.mjs';
 const DAY = 86400000;
 const SESSION_COOKIE = '__Host-originates_session';
 const STATE_COOKIE = '__Host-originates_oauth';
@@ -20,14 +22,18 @@ function secure(response) {
 }
 async function currentUser(request,db) {
   const token=getCookie(request,SESSION_COOKIE);if(!/^[a-f0-9]{64}$/.test(token||''))return null;
-  return db.prepare('SELECT users.id,users.github_login,users.email,users.name,users.created_at FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.hash=? AND sessions.expires_at>?').bind(await sha(token),Date.now()).first();
+  const hash=await sha(token);
+  const github=await db.prepare('SELECT users.id,users.github_login,users.email,users.name,users.created_at FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.hash=? AND sessions.expires_at>?').bind(hash,Date.now()).first();
+  if(github)return {...github,authMethod:'github'};
+  const email=await db.prepare('SELECT email_accounts.id,email_accounts.email,email_accounts.created_at FROM email_sessions JOIN email_accounts ON email_accounts.id=email_sessions.account_id WHERE email_sessions.hash=? AND email_sessions.expires_at>?').bind(hash,Date.now()).first();
+  return email?{...email,github_login:null,name:null,authMethod:'email'}:null;
 }
 async function rateLimit(db,request) {
   const key='oauth:'+await sha(request.headers.get('CF-Connecting-IP')||'local');const now=Date.now();
   const r=await db.prepare('INSERT INTO rate_limits(key,hits,resets) VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET hits=CASE WHEN resets<=? THEN 1 ELSE hits+1 END,resets=CASE WHEN resets<=? THEN excluded.resets ELSE resets END RETURNING hits').bind(key,now+900000,now,now).first();
   return r.hits<=30;
 }
-export function createWorker({fetcher=globalThis.fetch,assets=STATIC_ASSETS}={}) {
+export function createWorker({fetcher=globalThis.fetch,assets=STATIC_ASSETS,passkeys=passkeyRoute}={}) {
   async function route(request,env) {
     const url=new URL(request.url),path=url.pathname;
     const configuredOrigin=env.APP_ORIGIN;
@@ -37,9 +43,11 @@ export function createWorker({fetcher=globalThis.fetch,assets=STATIC_ASSETS}={})
     const db=env.DB;
     const configured=!!(db&&env.GITHUB_CLIENT_ID&&env.GITHUB_CLIENT_SECRET);
     if(path==='/api/health'&&request.method==='GET') {
-      try { if(!db)throw Error();await db.prepare('SELECT id FROM users LIMIT 1').first();return json({ok:true,authentication:configured?'github':'not-configured',build:'cloudflare-free-v1'}); }
+      try { if(!db)throw Error();await db.prepare('SELECT id FROM users LIMIT 1').first();return json({ok:true,authentication:configured?'github-and-email-passkey':'email-passkey',build:'robotics-v2.1'}); }
       catch {return json({ok:false,error:'Database is not ready.'},503);}
     }
+    if(path.startsWith('/api/passkey/'))return passkeys(request,env);
+    if(path==='/api/projects'||path.startsWith('/api/projects/'))return projectsRoute(request,env,await currentUser(request,db));
     if(path==='/auth/github'&&request.method==='GET') {
       if(!configured)return redirect('/login?error=not_configured');
       if(!await rateLimit(db,request))return json({error:'Too many sign-in attempts. Try again in 15 minutes.'},429);
@@ -77,23 +85,23 @@ export function createWorker({fetcher=globalThis.fetch,assets=STATIC_ASSETS}={})
     }
     if(path==='/api/me'&&request.method==='GET') {
       if(!db)return json({error:'Account storage is not ready.'},503);
-      const u=await currentUser(request,db);return u?json({user:{email:u.email,login:u.github_login,name:u.name,createdAt:u.created_at}}):json({error:'Please log in.'},401);
+      const u=await currentUser(request,db);return u?json({user:{email:u.email,login:u.github_login,name:u.name,createdAt:u.created_at,authMethod:u.authMethod,emailVerified:u.authMethod==='github'&&!!u.email}}):json({error:'Please log in.'},401);
     }
     if(path==='/api/logout'&&request.method==='POST') {
       if(request.headers.get('Origin')!==origin||request.headers.get('Sec-Fetch-Site')==='cross-site')return json({error:'Request origin is not allowed.'},403);
       const token=getCookie(request,SESSION_COOKIE);
-      if(db&&/^[a-f0-9]{64}$/.test(token||''))await db.prepare('DELETE FROM sessions WHERE hash=?').bind(await sha(token)).run();
+      if(db&&/^[a-f0-9]{64}$/.test(token||''))await db.batch([db.prepare('DELETE FROM sessions WHERE hash=?').bind(await sha(token)),db.prepare('DELETE FROM email_sessions WHERE hash=?').bind(await sha(token))]);
       const response=json({ok:true});response.headers.append('Set-Cookie',cookie(SESSION_COOKIE,'',0));return response;
     }
     if(path.startsWith('/api/')||path.startsWith('/auth/'))return json({error:'Not found or method not allowed.'},404);
     if(request.method!=='GET'&&request.method!=='HEAD')return json({error:'Method not allowed.'},405);
     if(path==='/app') {if(!db||!await currentUser(request,db))return redirect('/login');}
     const asset=assets[path];if(!asset)return new Response('Page not found',{status:404,headers:{'Content-Type':'text/plain; charset=utf-8'}});
-    return new Response(request.method==='HEAD'?null:asset.body,{headers:{'Content-Type':asset.type+'; charset=utf-8'}});
+    return new Response(request.method==='HEAD'?null:asset.base64?Uint8Array.from(atob(asset.body),c=>c.charCodeAt(0)):asset.body,{headers:{'Content-Type':asset.type+'; charset=utf-8'}});
   }
   return {
     async fetch(request,env) {try{return secure(await route(request,env));}catch {return secure(json({error:'Service temporarily unavailable. Please try again.'},503));}},
-    async scheduled(event,env,ctx) {const now=Date.now();await env.DB.batch([env.DB.prepare('DELETE FROM sessions WHERE expires_at<=?').bind(now),env.DB.prepare('DELETE FROM oauth_states WHERE expires_at<=?').bind(now),env.DB.prepare('DELETE FROM rate_limits WHERE resets<=?').bind(now)]);}
+    async scheduled(event,env,ctx) {const now=Date.now();await env.DB.batch([env.DB.prepare('DELETE FROM sessions WHERE expires_at<=?').bind(now),env.DB.prepare('DELETE FROM oauth_states WHERE expires_at<=?').bind(now),env.DB.prepare('DELETE FROM rate_limits WHERE resets<=?').bind(now),env.DB.prepare('DELETE FROM email_sessions WHERE expires_at<=?').bind(now),env.DB.prepare('DELETE FROM webauthn_challenges WHERE expires_at<=?').bind(now)]);}
   };
 }
 export default createWorker();
