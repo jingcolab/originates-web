@@ -8,7 +8,13 @@ const getCookie=(r,n)=>(r.headers.get('Cookie')||'').split(';').map(s=>s.trim())
 function json(v,status=200,cookies=[]){const h=new Headers({'Content-Type':'application/json; charset=utf-8'});for(const c of cookies)h.append('Set-Cookie',c);return new Response(JSON.stringify(v),{status,headers:h});}
 const b64=v=>btoa(String.fromCharCode(...v));const bytes=v=>Uint8Array.from(atob(v),c=>c.charCodeAt(0));
 export function validOrigin(r){return r.headers.get('Origin')===new URL(r.url).origin&&r.headers.get('Sec-Fetch-Site')!=='cross-site';}
-export async function bodyJSON(r){if(!r.headers.get('Content-Type')?.startsWith('application/json'))throw Error('invalid');const text=await r.text();if(encoder.encode(text).length>32768)throw Error('invalid');return JSON.parse(text);}
+export async function bodyJSON(r){
+ if(!r.headers.get('Content-Type')?.startsWith('application/json')||Number(r.headers.get('Content-Length'))>32768||!r.body)throw Error('invalid');
+ const reader=r.body.getReader(),chunks=[];let size=0;
+ for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>32768){await reader.cancel();throw Error('invalid');}chunks.push(value);}
+ const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+ return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+}
 export function normalizeEmail(value){if(typeof value!=='string')return null;const s=value.trim().toLowerCase();if(s.length>254||!/^[a-z0-9.!#$%&'*+\-/=?^_`{|}~]{1,64}@[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z0-9-]{2,63}$/.test(s)||s.includes('..'))return null;return s;}
 async function allowed(db,r){const now=Date.now(),key='passkey:'+await sha(r.headers.get('CF-Connecting-IP')||'local');const x=await db.prepare('INSERT INTO rate_limits(key,hits,resets) VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET hits=CASE WHEN resets<=? THEN 1 ELSE hits+1 END,resets=CASE WHEN resets<=? THEN excluded.resets ELSE resets END RETURNING hits').bind(key,now+900000,now,now).first();return x.hits<=30;}
 export function createPasskeyHandler({verifyRegistration=verifyRegistrationResponse,verifyAuthentication=verifyAuthenticationResponse}={}){return async function passkeyRoute(request,env){

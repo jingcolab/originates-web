@@ -26,7 +26,7 @@ npm ci
 npm test
 ```
 
-Node.js 24+ is required. There are 27 automated unit/integration tests, including OAuth, passkey challenge binding/expiry/replay, invalid credentials, origin/CSRF protection, project ownership, quotas, logout and cleanup. Some tests inject a mock WebAuthn verifier to isolate persistence paths; a separate test uses the actual verifier to reject fabricated credentials. Separate live protocol tests use dedicated synthetic P-256 test keys and real production verification for registration and signed authentication. The system biometric/passkey dialog must be tested on the user’s own supported device; the shared browser cannot complete that native UI. No end-user biometric data is collected or stored.
+Node.js 24+ is required. There are 28 automated unit/integration tests, including OAuth, passkey challenge binding/expiry/replay, invalid credentials, origin/CSRF protection, project ownership, quotas, logout and cleanup. Some tests inject a mock WebAuthn verifier to isolate persistence paths; a separate test uses the actual verifier to reject fabricated credentials. Separate live protocol tests use dedicated synthetic P-256 test keys and real production verification for registration and signed authentication. The system biometric/passkey dialog must be tested on the user’s own supported device; the shared browser cannot complete that native UI. No end-user biometric data is collected or stored.
 
 See [cloudflare/README.md](cloudflare/README.md) for configuration, deployment, schema and rollback.
 
