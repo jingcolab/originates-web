@@ -12,7 +12,7 @@ Node.js 24+. The pinned SimpleWebAuthn libraries implement registration/authenti
 - `src/worker.mjs`: allowed origins, existing GitHub OAuth, account/session reads, headers and cleanup.
 - `src/passkeys.mjs`: WebAuthn registration and login; email normalization; browser-bound single-use ten-minute challenges; required user verification; RP/origin binding; public-key credential storage.
 - `src/projects.mjs`: per-account project CRUD, validation and 50-project quota.
-- `public/`: Chinese robotics website, account UI, local prompt builder, Markdown exporter and concept image.
+- `public/`: English robotics website, account UI, local prompt builder, Markdown exporter and concept image.
 - `schema.sql`: additive CREATE IF NOT EXISTS schema. It preserves existing GitHub users/sessions and adds email accounts, passkeys, email sessions, WebAuthn challenges and projects.
 - `dist/worker.mjs`: generated standalone deployment bundle. `src/assets.mjs` and `public/auth.js` are generated too.
 

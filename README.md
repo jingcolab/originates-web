@@ -1,6 +1,6 @@
 # Originates · Robotics & Embodied AI
 
-A Chinese-language developer site for **physical robotics and embodied AI**, with a real project notebook on **Cloudflare Workers Free + D1**. No Supabase, paid Worker upgrade, model charges, or hardware connection is enabled.
+A English-language developer site for **physical robotics and embodied AI**, with a real project notebook on **Cloudflare Workers Free + D1**. No Supabase, paid Worker upgrade, model charges, or hardware connection is enabled.
 
 - Website: https://originates.dev (GitHub Pages)
 - Login / email registration: https://originates-web.fucicbck.workers.dev/login
@@ -26,10 +26,14 @@ npm ci
 npm test
 ```
 
-Node.js 24+ is required. There are 28 automated unit/integration tests, including OAuth, passkey challenge binding/expiry/replay, invalid credentials, origin/CSRF protection, project ownership, quotas, logout and cleanup. Some tests inject a mock WebAuthn verifier to isolate persistence paths; a separate test uses the actual verifier to reject fabricated credentials. Separate live protocol tests use dedicated synthetic P-256 test keys and real production verification for registration and signed authentication. The system biometric/passkey dialog must be tested on the user’s own supported device; the shared browser cannot complete that native UI. No end-user biometric data is collected or stored.
+Node.js 24+ is required. There are 29 automated unit/integration tests, including OAuth, passkey challenge binding/expiry/replay, invalid credentials, origin/CSRF protection, project ownership, quotas, logout and cleanup. Some tests inject a mock WebAuthn verifier to isolate persistence paths; a separate test uses the actual verifier to reject fabricated credentials. Separate live protocol tests use dedicated synthetic P-256 test keys and real production verification for registration and signed authentication. The system biometric/passkey dialog must be tested on the user’s own supported device; the shared browser cannot complete that native UI. No end-user biometric data is collected or stored.
 
 See [cloudflare/README.md](cloudflare/README.md) for configuration, deployment, schema and rollback.
 
 ## Hosting boundary
 
 The homepage remains on GitHub Pages and links to the Worker account site. `/login/` and `/app/` forward there. The Pages CNAME is preserved: the Cloudflare account used for this Worker does not contain the `originates.dev` zone. No DNS transfer was performed. GitHub source updates run tests and publish Pages, but do not automatically deploy the Worker.
+
+## Interface language
+
+The public website, authentication screens, workspace labels, error messages, AI prompt template and Markdown export headings are in English. Existing project category/stage codes and user-written names/notes are preserved; no database migration is required for this language-only update.

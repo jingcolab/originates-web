@@ -43,7 +43,7 @@ export function createWorker({fetcher=globalThis.fetch,assets=STATIC_ASSETS,pass
     const db=env.DB;
     const configured=!!(db&&env.GITHUB_CLIENT_ID&&env.GITHUB_CLIENT_SECRET);
     if(path==='/api/health'&&request.method==='GET') {
-      try { if(!db)throw Error();await db.prepare('SELECT id FROM users LIMIT 1').first();return json({ok:true,authentication:configured?'github-and-email-passkey':'email-passkey',build:'robotics-v2.2'}); }
+      try { if(!db)throw Error();await db.prepare('SELECT id FROM users LIMIT 1').first();return json({ok:true,authentication:configured?'github-and-email-passkey':'email-passkey',build:'robotics-en-v3'}); }
       catch {return json({ok:false,error:'Database is not ready.'},503);}
     }
     if(path.startsWith('/api/passkey/'))return passkeys(request,env);
